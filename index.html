@@ -27,13 +27,14 @@
         不确定：
         <p class="interim" id="interim_span"></p>
     </div>
-    <button onclick="handleStart()" id="btnEl">start transrcipting</button>
+    <!-- <button onclick="handleStart()" id="btnEl">start transrcipting</button> -->
 
     <script>
         var recognition = null;
         var speechEl = document.getElementById("speechEl");
         var final_transcript = ''
         var isTranscripting = false;
+        var startTimestamp = undefined
         function getUserMedia() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 alert("navigator.mediaDevices.getUserMedia is not supported");
@@ -98,6 +99,8 @@
                         // }
                         ignore_onend = true;
                     }
+
+                    console.log('jinx err', event)
                 };
 
                 recognition.onend = function () {
@@ -120,15 +123,24 @@
                     //     create_email = false;
                     //     createEmail();
                     // }
-                    console.log('end transcript')
+                    console.log('jinx end transcript')
+                    recognition.start()
                 };
+                recognition.onsoundstart = function (event) {
+                    startTimestamp = Date.now();
+                    console.log('jinx sound start')
+                }
+                // recognition.onsoundend = function (event) {
+                //     startTimestamp = undefined;
+                //     console.log('jinx sound end')
+                // }
 
                 recognition.onresult = function (event) {
                     var interim_transcript = '';
-                    console.log('jinx resulr', event, speechEl)
+                    console.log('jinx result', Date.now() - startTimestamp)
                     if (typeof (event.results) == 'undefined') {
-                        recognition.onend = null;
-                        recognition.stop();
+                        // recognition.onend = null;
+                        // recognition.stop();
                         return;
                     }
                     for (var i = event.resultIndex; i < event.results.length; ++i) {
@@ -174,6 +186,7 @@
         function main() {
             getUserMedia()
             initWebSpeech()
+            recognition.start();
         }
 
         main()
